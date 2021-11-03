@@ -8,21 +8,20 @@ class ApplicationController < Sinatra::Base
   end
 
   get '/' do
-    # your code here
+    erb :home
   end
 
   get '/registrations/signup' do
-    # your code here
+    erb :'/registrations/signup'
   end
 
   post '/registrations' do
-    # your code here
+    @user = User.new(name: params["name"], email: params["email"], password: params["password"])
+    @user.save
+
+    session[:user_id] = @user.id
 
     redirect '/users/home'
-  end
-
-  get '/users/home' do
-    # your code here
   end
 
   get '/sessions/login' do
@@ -31,15 +30,22 @@ class ApplicationController < Sinatra::Base
   end
 
   post '/sessions' do
-    # your code here
-
-    redirect '/users/home'
+    @user = User.find_by(email: params[:email], password: params[:password])
+    if @user
+      session[:user_id] = @user.id
+      redirect '/users/home'
+    end
+    redirect '/sessions/login'
   end
 
   get '/sessions/logout' do
-    # your code here
-    
+    session.clear
     redirect '/'
+  end
+
+  get '/users/home' do
+    @user = User.find(session[:user_id])
+    erb :'/users/home'
   end
 
 end
